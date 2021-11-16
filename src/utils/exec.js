@@ -1,7 +1,7 @@
 const { spawn } = require("child_process");
 
 function exec(command, args, directory) {
-    const childProcess = spawn(command, args, { stdio: "pipe", cwd: directory });
+    const childProcess = spawn(command, args, { stdio: "pipe", cwd: directory, detached: true });
 
     childProcess.on("error", function (error) {
         console.log(error);

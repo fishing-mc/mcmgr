@@ -1,6 +1,6 @@
 const exec = require("../utils/exec")
 const doneRegex = /Done \([0-9]+.[0-9]+s\)! For help, type "help"/
-
+const listRegex = /There are [0-9]+ of a max of [0-9]+ players online: ([A-z, ]+)/
 class Server {
     constructor(directory, ) {
         this.isRunning = false;
@@ -10,32 +10,50 @@ class Server {
     #parseLine(str) {
         if (str.match(doneRegex)) {
             console.log("[Server] Server started")
+            this.isRunning = true;
+        } else {
+            process.stdout.write(str)
         }
     }
 
     start() {
-        this.serverProcess = exec("java", ["-jar", "server.jar"], this.directory);
-        this.serverProcess.stdout.on("data", (data) => {
-            this.#parseLine(data.toString())
+        console.log("[Server] Starting...")
+        return new Promise((resolve, reject) => {
+            this.serverProcess = exec("java.exe", ["-Xmx1024M", "-Xms512M", "-jar", "server.jar", "nogui"], this.directory);
+            this.serverProcess.stdout.on("data", (data) => {
+                if (data.toString().match(doneRegex)) resolve() // once server started resolves
+                this.#parseLine(data.toString())
+            })
         })
-        // process.stdin.pipe(serverProcess.stdin)
-        // setTimeout(() => {
-        //     serverProcess.stdin.write("say Fortnite Gaming\n")
-        // }, 120000);
-        // process.stdin.write("list\n");
     }
     
     stop() {
-        this.execute("stop")
-        this.serverProcess.on("close", (code) => {
-            console.log("Server closed")
-            this.isRunning = false;
-            return code
+        return new Promise((resolve, reject) => {
+            if (!this.isRunning) resolve()
+            this.execute("stop")
+            this.serverProcess.once("close", (code) => {
+                console.log("Server closed")
+                this.isRunning = false;
+                resolve()
+            })
+        })
+    }
+
+    list() {
+        this.execute("list").then(str => {
+            console.log(str)
+            let matches = str.match(listRegex)
+            return matches[1].split(", ")
         })
     }
 
     execute(command) {
-        this.serverProcess.stdin.write(command + "\n")
+        return new Promise((resolve, reject) => {
+            this.serverProcess.stdin.write(command + "\n")
+            this.serverProcess.stdout.once("data", (data) => {
+                resolve(data.toString())
+            })
+        })
     }
 }
 
