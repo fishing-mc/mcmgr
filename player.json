@@ -1,0 +1,25 @@
+{
+    "username": "Mr. Minecraft",
+    "avatar_url": "https://hral.xyz/img/fishing/mr_minecraft.png",
+    "content": "",
+    "embeds": [
+      {
+        "title": "STEVE",
+        "color": 16777045,
+        "description": "Has <action> the game",
+        "timestamp": "2021-11-15T05:18:00.000Z",
+        "author": {
+          "name": ""
+        },
+        "image": {
+          "url": ""
+        },
+        "thumbnail": {
+          "url": "https://cravatar.eu/avatar/STEVE/64.png"
+        },
+        "footer": {},
+        "fields": []
+      }
+    ],
+    "components": []
+  }

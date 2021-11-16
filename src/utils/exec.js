@@ -1,7 +1,7 @@
 const { spawn } = require("child_process");
 
-function exec(command, args) {
-    const childProcess = spawn(command, args, { stdio: "pipe" });
+function exec(command, args, directory) {
+    const childProcess = spawn(command, args, { stdio: "pipe", cwd: directory });
 
     childProcess.on("error", function (error) {
         console.log(error);
@@ -12,7 +12,7 @@ function exec(command, args) {
             console.log("Command failed with code " + code);
         }
     });
-    return childProcess.stdout;
+    return childProcess;
 }
 
 module.exports = exec;
