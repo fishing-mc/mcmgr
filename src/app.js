@@ -1,20 +1,28 @@
 const Server = require("./classes/server.js")
+const Minehook = require('./classes/minehook.js');
+
 let server = new Server("./server")
 
 process.on('SIGINT', async (code) => {
     console.log('SIGTERM received...');
-    await server.stop()
-    process.exit()
+    exit()
 });
 
-async function main() {
-    await server.start() // wait for server to start
-    // while (true) {
-        let players = await server.list()
-        // server.execute("list")
-        console.log(players)
-    // }
+async function exit() {
+    await server.stop()
+    process.exit()
 }
 
-// process.on("before")
+async function main() {
+    try {
+        await server.start() // wait for server to start
+    } catch (error) {
+        console.log(`error recieved ${error}`)
+        exit()
+    }
+}
+
+let webhook = new Minehook(/* Webhook Url */)
+webhook.sendPlayerAction("hrlou", "joined")
+
 main()
