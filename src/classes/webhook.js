@@ -25,10 +25,30 @@ class Webhook {
     }
  
     send(data) {
-        console.log(typeof(data))
+        if (typeof(data) === "object") data = JSON.stringify(data)
         this.postOptions["headers"]['Content-Length'] = data.length
         this.postRequest = https.request(this.postOptions)
         this.postRequest.write(data)
+    }
+    
+    /**
+     * @param template  a template of json to send ex. { "content": "<title>" } 
+     * @param subs      a object containing keys to perform substitutions on given temple
+     *                  if given template { "content": "<title>" }, to replace title with Hello
+     *                  give subs { title: "Hello" }
+     */
+    sendFormatted(template, subs) {
+        let formatted = JSON.stringify(template)
+        for (const property in subs) {
+            let regex = RegExp(`<${property}>`, "g")
+            if (typeof(subs[property]) === "number") {
+                regex = RegExp(`"<${property}>"`, "g")
+            }
+            formatted = formatted.replace(regex, subs[property])
+        }
+        let today = new Date()
+        formatted = formatted.replace(/<timestamp>/g, today.toISOString())
+        this.send(formatted)
     }
 }
 

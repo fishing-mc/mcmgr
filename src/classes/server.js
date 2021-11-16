@@ -1,45 +1,62 @@
 const exec = require("../utils/exec")
+const EventEmitter = require('events');
+const { stderr } = require("process");
+
 const doneRegex = /Done \([0-9]+.[0-9]+s\)! For help, type "help"/
 const listRegex = /There are ([0-9]+) of a max of ([0-9]+) players online: ?([A-z0-9,_ ]+)/
-const playerRegex = /([A-z0-9_]+) ([A-z]+) the game/
+const joinLeaveRegex = /([A-z0-9_]+) ([A-z]+) the game/
+
 class Server {
+    /**
+     * @event "event" (event) -> server started event
+     * @event "complete" (event) -> server completed event
+     * @event "action" (player, action) -> player has done action
+     * @event "crash" () -> server has crashed
+     */
     constructor (directory) {
-        this.isRunning = false;
+        this.event = new EventEmitter()
+        // console event listeners
+        this.event.on("event", (event) => this.log(`${event}`))
+        this.event.on("complete", (event) => this.log(`${event} complete`))
+        this.event.on("action", (player, action) => this.log(`${player} has ${action}`))
+        this.event.on("crash", () => this.log("Crashed!"))
         this.directory = directory;
     }
     
+    log(str) { stderr.write(`[Server] ${str}\n`) }
+
     #parseLine(line) {
         let matches
-        if (matches = line.match(doneRegex)) {
-            console.log("[Server] Server started")
-            this.isRunning = true;
-        } else if (matches = line.match(playerRegex)) {
-            console.log(matches)
-        } else {
-            // process.stdout.write(line)
+        if (matches = line.match(doneRegex)) { // Server Started
+            this.event.emit("complete", "start")
+        } else if (matches = line.match(joinLeaveRegex)) { // Player has joined/left
+            this.event.emit("action", matches[1], matches[2])
         }
     }
 
     start() {
-        console.log("[Server] Starting...")
+        this.event.emit("event", "start") // Server Starting
         return new Promise((resolve, reject) => {
             this.serverProcess = exec("java.exe", ["-Xmx1024M", "-Xms512M", "-jar", "server.jar"], this.directory);
             this.serverProcess.stdout.on("data", (data) => {
                 if (data.toString().match(doneRegex)) resolve() // once server started resolves
                 this.#parseLine(data.toString())
             })
+            this.serverProcess.once("close", (code) => {
+                if (code != 0) {
+                    this.log(`Exited with code ${code}`)
+                    this.event.emit("crash")
+                } else {
+                    this.event.emit("complete", "stop")
+                }
+            })
         })
     }
     
     stop() {
         return new Promise((resolve, reject) => {
-            if (!this.isRunning) resolve()
+            this.event.emit("event", "stop")
             this.execute("stop")
-            this.serverProcess.once("close", (code) => {
-                console.log("Server closed")
-                this.isRunning = false;
-                resolve()
-            })
         })
     }
 
@@ -60,7 +77,6 @@ class Server {
                 let returnStr = data.toString()
                 if (returnStr.includes("Unknown or incomplete command")) {
                     // there was an error executing the given command
-                    // throw new Error("Error executing command") //
                 }
                 resolve(returnStr)
             })
