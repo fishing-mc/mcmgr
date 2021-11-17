@@ -1,4 +1,5 @@
 const exec = require("../utils/exec")
+const fs = require("fs")
 const EventEmitter = require('events');
 const { stderr } = require("process");
 
@@ -14,13 +15,16 @@ class Server {
      * @event "crash" () -> server has crashed
      */
     constructor (directory) {
+        this.directory = directory;
+        this.jvmArgs = [ "-Xmx1024M", "-Xms512M" ]
+        this.jarFile = "server.jar"
+
         this.event = new EventEmitter()
         // console event listeners
         this.event.on("event", (event) => this.log(`${event}`))
         this.event.on("complete", (event) => this.log(`${event} complete`))
         this.event.on("action", (player, action) => this.log(`${player} has ${action}`))
         this.event.on("crash", () => this.log("Crashed!"))
-        this.directory = directory;
     }
     
     log(str) { stderr.write(`[Server] ${str}\n`) }
@@ -37,7 +41,7 @@ class Server {
     start() {
         this.event.emit("event", "start") // Server Starting
         return new Promise((resolve, reject) => {
-            this.serverProcess = exec("java.exe", ["-Xmx1024M", "-Xms512M", "-jar", "server.jar"], this.directory);
+            this.serverProcess = exec("java.exe", this.jvmArgs.concat(["-jar", this.jarFile]), this.directory);
             this.serverProcess.stdout.on("data", (data) => {
                 if (data.toString().match(doneRegex)) resolve() // once server started resolves
                 this.#parseLine(data.toString())

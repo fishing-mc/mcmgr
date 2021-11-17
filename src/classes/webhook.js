@@ -1,17 +1,12 @@
 const axios = require("axios")
 
 class Webhook {
-    constructor (url) {
-        this.url = url;
-    }
+    constructor (url) { this.url = url; }
+    message(message) { this.send({content: message}) }
 
     send(data) {
         if (typeof(data) === "object") data = JSON.stringify(data)
-        axios.post(this.url, data, { headers: {'Content-Type': 'application/json' } });
-    }
-
-    message(message) {
-        this.send({content: message})
+        if (this.url) axios.post(this.url, data, { headers: {'Content-Type': 'application/json' } });
     }
 
     /**

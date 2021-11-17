@@ -1,8 +1,8 @@
+
 const Server = require("./classes/server.js")
 const Minehook = require('./classes/minehook.js');
 
-let server = new Server("./server")
-let webhook = new Minehook(/* webhook url */)
+let options = {}
 
 process.on('SIGINT', async (code) => {
     console.log('SIGTERM received...');
@@ -32,5 +32,22 @@ async function main() {
     server.event.on("action", (player, action) => webhook.sendPlayerAction(player, action))
     await server.start() // wait for server to start
 }
+
+// Get options from the command line
+for (var i = 0; i < process.argv.length; i++) {
+    switch (process.argv[i]) {
+    case "-d":
+    case "--directory":
+        options["directory"] = process.argv[++i]
+        break
+    case "-w":
+    case "--webhook":
+        options["webhook"] = process.argv[++i]
+        break
+    } 
+}
+console.log(options)
+let server = new Server(options["directory"])
+let webhook = new Minehook(options["webhook"])
 
 main()
