@@ -14,16 +14,15 @@ class Server {
      * @event "action" (player, action) -> player has done action
      * @event "crash" () -> server has crashed
      */
-    constructor (directory, java) {
+    constructor (directory, java, jvm) {
         this.directory = directory;
 
-        this.jvmArgs = [ "-Xmx1024M", "-Xms512M" ]
         this.jarFile = "server.jar"
-        this.javaExe = java
-        if (this.javaExe === undefined) {
-            this.javaExe = "java"
-        }
-
+        this.jvmArgs = [ "-Xmx1024M", "-Xms512M" ]
+        this.javaExe = "java"
+        if (jvm !== undefined) this.jvmArgs = jvm.split(" ")
+        if (java !== undefined) this.javaExe = java
+        console.log(this)
         this.event = new EventEmitter()
         // console event listeners
         this.event.on("event", (event) => this.log(`${event}`))

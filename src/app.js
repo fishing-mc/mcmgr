@@ -48,10 +48,16 @@ for (var i = 0; i < process.argv.length; i++) {
     case "--java":
         options["java"] = process.argv[++i]
         break
+    case "-a":
+    case "--jvm":
+        options["jvm"] = process.argv[++i]
+        break
+    default:
+        console.log("Unknown options", process.argv[i])
     }
 }
 console.log(options)
-let server = new Server(options["directory"], options["java"])
+let server = new Server(options["directory"], options["java"], options["jvm"])
 let webhook = new Minehook(options["webhook"])
 
 main()
