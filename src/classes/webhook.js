@@ -1,36 +1,19 @@
-const https = require("https")
-// switch to axios later
-// const axios = require("axios")
+const axios = require("axios")
 
 class Webhook {
-    constructor (url_str) {
-        const url = new URL(url_str)
-        this.postOptions = {
-            hostname: url.hostname,
-            port: 443,
-            path: url.pathname,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': 0,
-            }
-        }
-        // this.postRequest = https.request(this.postOptions)
+    constructor (url) {
+        this.url = url;
+    }
+
+    send(data) {
+        if (typeof(data) === "object") data = JSON.stringify(data)
+        axios.post(this.url, data, { headers: {'Content-Type': 'application/json' } });
     }
 
     message(message) {
-        send(JSON.stringify({
-            "content": message
-        }))
+        this.send({content: message})
     }
- 
-    send(data) {
-        if (typeof(data) === "object") data = JSON.stringify(data)
-        this.postOptions["headers"]['Content-Length'] = data.length
-        this.postRequest = https.request(this.postOptions)
-        this.postRequest.write(data)
-    }
-    
+
     /**
      * @param template  a template of json to send ex. { "content": "<title>" } 
      * @param subs      a object containing keys to perform substitutions on given temple
