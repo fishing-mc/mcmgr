@@ -44,10 +44,14 @@ for (var i = 0; i < process.argv.length; i++) {
     case "--webhook":
         options["webhook"] = process.argv[++i]
         break
-    } 
+    case "-j":
+    case "--java":
+        options["java"] = process.argv[++i]
+        break
+    }
 }
 console.log(options)
-let server = new Server(options["directory"])
+let server = new Server(options["directory"], options["java"])
 let webhook = new Minehook(options["webhook"])
 
-main()
+// main()

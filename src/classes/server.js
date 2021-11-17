@@ -14,10 +14,15 @@ class Server {
      * @event "action" (player, action) -> player has done action
      * @event "crash" () -> server has crashed
      */
-    constructor (directory) {
+    constructor (directory, java) {
         this.directory = directory;
+
         this.jvmArgs = [ "-Xmx1024M", "-Xms512M" ]
         this.jarFile = "server.jar"
+        this.javaExe = java
+        if (this.javaExe === undefined) {
+            this.javaExe = "java"
+        }
 
         this.event = new EventEmitter()
         // console event listeners
@@ -41,7 +46,7 @@ class Server {
     start() {
         this.event.emit("event", "start") // Server Starting
         return new Promise((resolve, reject) => {
-            this.serverProcess = exec("java.exe", this.jvmArgs.concat(["-jar", this.jarFile]), this.directory);
+            this.serverProcess = exec(this.javaExe, this.jvmArgs.concat(["-jar", this.jarFile]), this.directory);
             this.serverProcess.stdout.on("data", (data) => {
                 if (data.toString().match(doneRegex)) resolve() // once server started resolves
                 this.#parseLine(data.toString())
