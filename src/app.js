@@ -54,4 +54,4 @@ console.log(options)
 let server = new Server(options["directory"], options["java"])
 let webhook = new Minehook(options["webhook"])
 
-// main()
+main()
