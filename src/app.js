@@ -2,6 +2,8 @@
 const Server = require("./classes/server.js")
 const Minehook = require('./classes/minehook.js');
 
+let server
+let webhook
 let options = {}
 
 process.on('SIGINT', async (code) => {
@@ -11,26 +13,27 @@ process.on('SIGINT', async (code) => {
 
 async function exit() {
     await server.stop()
-    // process.exit()
+    process.exit()
 }
 
 async function main() {
+    server = new Server(options["directory"], options["java"], options["jvm"])
+    webhook = new Minehook(options["webhook"])
     server.event.on("crash", () => {
         webhook.sendServerCrash()
         console.log("Restarting in 5 seconds...")
         setTimeout(() => {
-            delete server
-            server = new Server("./server")
             main()
         }, 5000);
     })
     server.event.on("complete", (event) => {
-        console.log("completed", event)
         if (event === "start") webhook.sendServerStart()
         else if (event === "stop") webhook.sendServerStop()
     })
     server.event.on("action", (player, action) => webhook.sendPlayerAction(player, action))
     await server.start() // wait for server to start
+    server.serverProcess.stdout.pipe(process.stdout)
+    process.stdin.pipe(server.serverProcess.stdin)
 }
 
 // Get options from the command line
@@ -56,8 +59,5 @@ for (var i = 0; i < process.argv.length; i++) {
         console.log("Unknown options", process.argv[i])
     }
 }
-
-let server = new Server(options["directory"], options["java"], options["jvm"])
-let webhook = new Minehook(options["webhook"])
 
 main()
