@@ -56,7 +56,7 @@ for (var i = 0; i < process.argv.length; i++) {
         console.log("Unknown options", process.argv[i])
     }
 }
-console.log(options)
+
 let server = new Server(options["directory"], options["java"], options["jvm"])
 let webhook = new Minehook(options["webhook"])
 

@@ -22,7 +22,7 @@ class Server {
         this.javaExe = "java"
         if (jvm !== undefined) this.jvmArgs = jvm.split(" ")
         if (java !== undefined) this.javaExe = java
-        console.log(this)
+        
         this.event = new EventEmitter()
         // console event listeners
         this.event.on("event", (event) => this.log(`${event}`))
