@@ -32,7 +32,7 @@ class Minehook extends Webhook {
     }
     sendServerRestart() {
         let template = JSON.parse(JSON.stringify(serverTemplate));
-        template["embeds"][0]["image"] = { "url": "https://tenor.com/view/viralhog-driving-idc-accident-gif-11703558" }
+        template["embeds"][0]["image"] = { "url": "https://hral.xyz/img/fishing/car-restart.gif" }
         this.sendFormatted(template, { title: "Restarting", color: 0x00AA00 /* minecraft dark green */, description: "Server is restarting", thumbnail: "https://hral.xyz/img/fishing/fish.png" }) 
     }
 }
