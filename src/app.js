@@ -23,6 +23,7 @@ async function main() {
         webhook.sendServerCrash()
         console.log("Restarting in 5 seconds...")
         setTimeout(() => {
+            webhook.sendServerRestart()
             main()
         }, 5000);
     })
