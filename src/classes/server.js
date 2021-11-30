@@ -1,7 +1,7 @@
 const exec = require("../utils/exec")
 const fs = require("fs")
 const EventEmitter = require('events');
-const { stderr } = require("process");
+const { stderr, exit } = require("process");
 
 const doneRegex = /Done \([0-9]+.[0-9]+s\)! For help, type "help"/
 const listRegex = /There are ([0-9]+) of a max of ([0-9]+) players online: ?([A-z0-9,_ ]+)/
@@ -18,7 +18,7 @@ class Server {
         this.directory = directory;
 
         this.jarFile = "server.jar"
-        this.jvmArgs = [ "-Xmx1024M", "-Xms512M" ]
+        this.jvmArgs = [ "-Xmx6144M", "-Xms2048M" ]
         this.javaExe = "java"
         if (jvm !== undefined) this.jvmArgs = jvm.split(" ")
         if (java !== undefined) this.javaExe = java
@@ -45,7 +45,7 @@ class Server {
     start() {
         this.event.emit("event", "start") // Server Starting
         return new Promise((resolve, reject) => {
-            this.serverProcess = exec(this.javaExe, this.jvmArgs.concat(["-jar", this.jarFile]), this.directory);
+            this.serverProcess = exec(this.javaExe, this.jvmArgs.concat(["-jar", this.jarFile, "nogui"]), this.directory);
             this.serverProcess.stdout.on("data", (data) => {
                 if (data.toString().match(doneRegex)) resolve() // once server started resolves
                 this.#parseLine(data.toString())
